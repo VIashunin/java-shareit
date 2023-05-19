@@ -1,6 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.NotOwnerException;
@@ -13,19 +13,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class ItemRepositoryImpl implements ItemRepository {
     private final ItemMapper itemMapper;
     private final UserRepository userRepository;
-    private final HashMap<Long, List<Item>> items;
-    private long id;
-
-    @Autowired
-    public ItemRepositoryImpl(ItemMapper itemMapper, UserRepository userRepository) {
-        this.itemMapper = itemMapper;
-        this.userRepository = userRepository;
-        items = new HashMap<>();
-        id = 1;
-    }
+    private final HashMap<Long, List<Item>> items = new HashMap<>();
+    private long id = 1;
 
     @Override
     public ItemDto addItem(long userId, Item item) {

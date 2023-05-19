@@ -1,6 +1,6 @@
 package ru.practicum.shareit.user.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.EmailIsAlreadyExistsException;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
@@ -13,17 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
     private final UserMapper userMapper;
-    private final List<User> userList;
-    private long id;
-
-    @Autowired
-    public UserRepositoryImpl(UserMapper userMapper) {
-        this.userMapper = userMapper;
-        userList = new ArrayList<>();
-        id = 1;
-    }
+    private final List<User> userList = new ArrayList<>();
+    private long id = 1;
 
     @Override
     public List<UserDto> getAllUsers() {
@@ -72,12 +66,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     private boolean validate(User otherUser) {
-        if (userList.stream()
-                .noneMatch(user -> user.getEmail().equals(otherUser.getEmail()))) {
-            return true;
-        } else if (userList.stream()
+        if ((userList.stream()
+                .noneMatch(user -> user.getEmail().equals(otherUser.getEmail())))
+                || (userList.stream()
                 .noneMatch(user -> user.getEmail().equals(otherUser.getEmail())
-                        && user.getId() != otherUser.getId())) {
+                        && user.getId() != otherUser.getId()))) {
             return true;
         } else {
             throw new EmailIsAlreadyExistsException(otherUser.getEmail());
