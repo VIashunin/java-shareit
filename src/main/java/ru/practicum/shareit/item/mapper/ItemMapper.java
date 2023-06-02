@@ -60,8 +60,8 @@ public class ItemMapper {
                 .build();
     }
 
-    public ItemDtoWithBookingAndComments mapToItemDtoWithBookingAndComments(Item item, BookingDtoForOwner bookingLast
-            , BookingDtoForOwner bookingNext, List<CommentDto> comments) {
+    public ItemDtoWithBookingAndComments mapToItemDtoWithBookingAndComments(Item item, BookingDtoForOwner bookingLast,
+                                                                            BookingDtoForOwner bookingNext, List<CommentDto> comments) {
         return ItemDtoWithBookingAndComments.builder()
                 .id(item.getId())
                 .owner(item.getOwner().getId())
@@ -74,9 +74,8 @@ public class ItemMapper {
                 .build();
     }
 
-    public List<ItemDtoWithBookingAndComments> mapToItemDtoWithBookingAndCommentsList(List<Item> itemList
-            , HashMap<Long, BookingDtoForOwner> bookingsLast, HashMap<Long, BookingDtoForOwner> bookingsNext
-            , HashMap<Long, List<CommentDto>> comments) {
+    public List<ItemDtoWithBookingAndComments> mapToItemDtoWithBookingAndCommentsList(List<Item> itemList, HashMap<Long,
+            BookingDtoForOwner> bookingsLast, HashMap<Long, BookingDtoForOwner> bookingsNext, HashMap<Long, List<CommentDto>> comments) {
         List<ItemDtoWithBookingAndComments> itemDtoWithBookingList = new ArrayList<>();
         for (Item item : itemList) {
             BookingDtoForOwner bookingLast = bookingsLast.get(item.getId());
