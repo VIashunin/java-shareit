@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoForOwner;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.exceptions.BookingNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
