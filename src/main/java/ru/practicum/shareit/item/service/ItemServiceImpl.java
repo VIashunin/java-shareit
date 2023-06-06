@@ -20,6 +20,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -42,13 +43,13 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         userService.findUserById(userId);
         ItemDto itemDtoForUpdate = itemMapper.mapFromItemDtoWithBookingAndCommentsToItemDto(getItemById(userId, itemId));
-        if (itemDto.getName() != null) {
+        if (!Objects.isNull(itemDto.getName())) {
             itemDtoForUpdate.setName(itemDto.getName());
         }
-        if (itemDto.getDescription() != null) {
+        if (!Objects.isNull(itemDto.getDescription())) {
             itemDtoForUpdate.setDescription(itemDto.getDescription());
         }
-        if (itemDto.getAvailable() != null) {
+        if (!Objects.isNull(itemDto.getAvailable())) {
             itemDtoForUpdate.setAvailable(itemDto.getAvailable());
         }
         return addItem(userId, itemDtoForUpdate);

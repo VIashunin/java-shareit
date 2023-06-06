@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.dto.CommentShort;
 import ru.practicum.shareit.comment.mapper.CommentMapper;
+import ru.practicum.shareit.comment.model.Comment;
 import ru.practicum.shareit.comment.repository.CommentRepository;
 import ru.practicum.shareit.exceptions.ItemWasNotBookedEarlierException;
 
@@ -35,7 +36,8 @@ public class CommentServiceImpl implements CommentService {
             if (commentDto.getCreated() == null) {
                 commentDto.setCreated(LocalDateTime.now());
             }
-            return commentMapper.mapFromCommentToCommentDto(commentRepository.save(commentMapper.mapFromCommentDtoToComment(commentDto, booking.getBooker(), booking.getItem())));
+            Comment comment = commentMapper.mapFromCommentDtoToComment(commentDto, booking.getBooker(), booking.getItem());
+            return commentMapper.mapFromCommentToCommentDto(commentRepository.save(comment));
         } else {
             throw new ItemWasNotBookedEarlierException();
         }

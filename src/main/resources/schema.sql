@@ -39,3 +39,4 @@ CREATE TABLE IF NOT EXISTS comments
     created   TIMESTAMP WITHOUT TIME ZONE                         NOT NULL,
     CONSTRAINT fk_author FOREIGN KEY (author_id) REFERENCES users (id)
 );
+

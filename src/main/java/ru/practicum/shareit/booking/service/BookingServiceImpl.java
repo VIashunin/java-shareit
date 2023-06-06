@@ -39,7 +39,7 @@ public class BookingServiceImpl implements BookingService {
                     .item(item)
                     .status(BookingStatus.WAITING)
                     .build();
-            if (!bookingDto.getItem().getAvailable()) {
+            if (!bookingDto.getItem().isAvailable()) {
                 throw new ItemNotAvailableException(bookingDto.getItem().getId());
             }
             if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().isEqual(bookingDto.getStart())) {
