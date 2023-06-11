@@ -10,25 +10,67 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String emailIsAlreadyExists(EmailIsAlreadyExistsException e) {
-        return e.getMessage();
+    public ErrorResponse emailIsAlreadyExists(EmailIsAlreadyExistsException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String userNotFound(UserNotFoundException e) {
-        return e.getMessage();
+    public ErrorResponse userNotFound(UserNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public String itemNotFound(ItemNotFoundException e) {
-        return e.getMessage();
+    public ErrorResponse itemNotFound(ItemNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public String notOwner(NotOwnerException e) {
-        return e.getMessage();
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse notOwnerOrNotBooker(NotOwnerOrNotBookerException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse itemNotAvailable(ItemNotAvailableException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse endBeforeOrEqualStart(EndBeforeOrEqualStartException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse bookingOfOwnItem(BookingOfOwnItemException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse bookingNotFound(BookingNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse bookingAlreadyApproved(BookingAlreadyApprovedException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse unknownBookingState(UnknownBookingStateException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse itemWasNotBookedEarlier(ItemWasNotBookedEarlierException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }
