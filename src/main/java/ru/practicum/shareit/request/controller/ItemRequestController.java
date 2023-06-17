@@ -2,7 +2,6 @@ package ru.practicum.shareit.request.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
@@ -14,26 +13,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
+    private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
 
     @PostMapping
-    ItemRequestDto addRequest(@RequestHeader(Constants.X_SHARER_USER_ID) long userId, @Valid @RequestBody ItemRequestDto itemRequestDto) {
+    ItemRequestDto addRequest(@RequestHeader(X_SHARER_USER_ID) long userId, @Valid @RequestBody ItemRequestDto itemRequestDto) {
         return itemRequestService.addRequest(userId, itemRequestDto);
     }
 
     @GetMapping
-    List<ItemRequestDto> getRequest(@RequestHeader(Constants.X_SHARER_USER_ID) long userId) {
+    List<ItemRequestDto> getRequest(@RequestHeader(X_SHARER_USER_ID) long userId) {
         return itemRequestService.getRequest(userId);
     }
 
     @GetMapping("/all")
-    List<ItemRequestDto> getAllRequests(@RequestHeader(Constants.X_SHARER_USER_ID) long userId,
+    List<ItemRequestDto> getAllRequests(@RequestHeader(X_SHARER_USER_ID) long userId,
                                         @RequestParam(required = false) Integer from,
                                         @RequestParam(required = false) Integer size) {
         return itemRequestService.getAllRequests(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
-    ItemRequestDto getRequestById(@RequestHeader(Constants.X_SHARER_USER_ID) long userId, @PathVariable long requestId) {
+    ItemRequestDto getRequestById(@RequestHeader(X_SHARER_USER_ID) long userId, @PathVariable long requestId) {
         return itemRequestService.getRequestById(userId, requestId);
     }
 }

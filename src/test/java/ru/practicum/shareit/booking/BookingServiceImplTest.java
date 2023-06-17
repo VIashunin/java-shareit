@@ -192,7 +192,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    public void confirmBookingExceptionTest() {
+    public void confirmBookingExceptionFirstTest() {
         Optional<Booking> bookingOpt = Optional.of(Booking.builder().id(1L).start(start).end(end).item(item).booker(user).bookingStatus(BookingStatus.APPROVED).build());
 
         Mockito.when(bookingRepository.findById(1L))
@@ -206,6 +206,17 @@ public class BookingServiceImplTest {
 
         assertEquals(exceptionFirst.getMessage(), "You are not the owner of requested item for booking confirmation.");
         assertEquals(exceptionSecond.getMessage(), "Booking with id: 1 is already approved.");
+    }
+
+    @Test
+    public void confirmBookingExceptionSecondTest() {
+        Mockito.when(bookingRepository.findById(100L))
+                .thenThrow(new BookingNotFoundException(100));
+
+        final BookingNotFoundException exception = assertThrows(BookingNotFoundException.class,
+                () -> bookingService.confirmBooking(owner.getId(), 100L, true));
+
+        assertEquals(exception.getMessage(), "Booking with id: 100 does not exist.");
     }
 
     @Test

@@ -11,6 +11,7 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.status.BookingStatus;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.exceptions.PageableParametersAreInvalidException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBookingAndComments;
@@ -138,5 +139,16 @@ public class ItemServiceImplTest {
                 () -> itemService.paginate(-1, 4));
 
         assertEquals(exception.getMessage(), "From or size pageable parameters are invalid.");
+    }
+
+    @Test
+    void findItemByIdTest() {
+        Mockito.when(itemRepository.findById(100L))
+                .thenThrow(new ItemNotFoundException(100L));
+
+        final ItemNotFoundException exception = assertThrows(ItemNotFoundException.class,
+                () -> itemService.findItemById(100));
+
+        assertEquals(exception.getMessage(), "Item with id: 100 does not exist.");
     }
 }
