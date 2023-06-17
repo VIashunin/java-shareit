@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDtoForOwner;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -13,6 +15,9 @@ import ru.practicum.shareit.item.dto.ItemDtoWithBookingAndComments;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.mapper.ItemRequestMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -22,27 +27,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import static ru.practicum.shareit.request.service.ItemRequestServiceImpl.getPageable;
+
 @Service
-@RequiredArgsConstructor
 @Transactional
+@NoArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final ItemRepository itemRepository;
-    private final UserService userService;
-    private final ItemMapper itemMapper;
-    private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
-    private final CommentService commentService;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private ItemRequestService itemRequestService;
 
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
         User user = userService.findUserById(userId);
-        return itemMapper.mapFromItemToItemDto(itemRepository.save(itemMapper.mapFromItemDtoToItem(itemDto, user)));
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = ItemRequestMapper.mapFromItemRequestDtoToItemRequest(itemRequestService.getRequestById(userId, itemDto.getRequestId()), user);
+        }
+        return ItemMapper.mapFromItemToItemDto(itemRepository.save(ItemMapper.mapFromItemDtoToItem(itemDto, user, itemRequest)));
     }
 
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         userService.findUserById(userId);
-        ItemDto itemDtoForUpdate = itemMapper.mapFromItemDtoWithBookingAndCommentsToItemDto(getItemById(userId, itemId));
+        ItemDto itemDtoForUpdate = ItemMapper.mapFromItemDtoWithBookingAndCommentsToItemDto(getItemById(userId, itemId));
         if (!Objects.isNull(itemDto.getName())) {
             itemDtoForUpdate.setName(itemDto.getName());
         }
@@ -58,37 +73,43 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDtoWithBookingAndComments getItemById(long userId, long itemId) {
         Item item = findItemById(itemId);
-        BookingDtoForOwner bookingLast = bookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdLast(userId, itemId, LocalDateTime.now()));
-        BookingDtoForOwner bookingNext = bookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdNext(userId, itemId, LocalDateTime.now()));
+        BookingDtoForOwner bookingLast = BookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdLast(userId, itemId, LocalDateTime.now()));
+        BookingDtoForOwner bookingNext = BookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdNext(userId, itemId, LocalDateTime.now()));
         List<CommentDto> comments = commentService.getCommentsByItemId(itemId);
-        return itemMapper.mapToItemDtoWithBookingAndComments(item, bookingLast, bookingNext, comments);
+        return ItemMapper.mapToItemDtoWithBookingAndComments(item, bookingLast, bookingNext, comments);
     }
 
     @Override
-    public List<ItemDtoWithBookingAndComments> getAllItemsByUserId(long userId) {
+    public List<ItemDtoWithBookingAndComments> getAllItemsByUserId(long userId, Integer from, Integer size) {
+        Pageable page = paginate(from, size);
         HashMap<Long, BookingDtoForOwner> bookingsLast = new HashMap<>();
         HashMap<Long, BookingDtoForOwner> bookingsNext = new HashMap<>();
         HashMap<Long, List<CommentDto>> comments = new HashMap<>();
-        List<Item> items = itemRepository.findByOwnerId(userId);
+        List<Item> items = itemRepository.findByOwnerId(userId, page);
         for (Item i : items) {
-            bookingsLast.put(i.getId(), bookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdLast(userId, i.getId(), LocalDateTime.now())));
-            bookingsNext.put(i.getId(), bookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdNext(userId, i.getId(), LocalDateTime.now())));
+            bookingsLast.put(i.getId(), BookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdLast(userId, i.getId(), LocalDateTime.now())));
+            bookingsNext.put(i.getId(), BookingMapper.mapToBookingDtoForOwner(bookingRepository.findByItemIdNext(userId, i.getId(), LocalDateTime.now())));
             comments.put(i.getId(), commentService.getCommentsByItemId(i.getId()));
         }
-        return itemMapper.mapToItemDtoWithBookingAndCommentsList(items, bookingsLast, bookingsNext, comments);
+        return ItemMapper.mapToItemDtoWithBookingAndCommentsList(items, bookingsLast, bookingsNext, comments);
     }
 
     @Override
-    public List<ItemDto> searchAvailableItem(String text) {
+    public List<ItemDto> searchAvailableItem(String text, Integer from, Integer size) {
         if (text.isEmpty()) {
             return List.of();
         } else {
-            return itemMapper.mapFromItemListToItemDtoList(itemRepository.searchAvailableItem(text));
+            Pageable page = paginate(from, size);
+            return ItemMapper.mapFromItemListToItemDtoList(itemRepository.searchAvailableItem(text, page));
         }
     }
 
     @Override
     public Item findItemById(long itemId) {
         return itemRepository.findById(itemId).orElseThrow(() -> new ItemNotFoundException(itemId));
+    }
+
+    public Pageable paginate(Integer from, Integer size) {
+        return getPageable(from, size);
     }
 }

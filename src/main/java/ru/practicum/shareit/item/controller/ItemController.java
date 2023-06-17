@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.dto.CommentShort;
 import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBookingAndComments;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.constants.Constants;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -40,13 +40,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoWithBookingAndComments> getAllItemsByUserId(@RequestHeader(Constants.X_SHARER_USER_ID) long userId) {
-        return itemService.getAllItemsByUserId(userId);
+    public List<ItemDtoWithBookingAndComments> getAllItemsByUserId(@RequestHeader(Constants.X_SHARER_USER_ID) long userId,
+                                                                   @RequestParam(required = false) Integer from,
+                                                                   @RequestParam(required = false) Integer size) {
+        return itemService.getAllItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchAvailableItem(@NotBlank @RequestParam String text) {
-        return itemService.searchAvailableItem(text);
+    public List<ItemDto> searchAvailableItem(@NotBlank @RequestParam String text,
+                                             @RequestParam(required = false) Integer from,
+                                             @RequestParam(required = false) Integer size) {
+        return itemService.searchAvailableItem(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

@@ -11,10 +11,11 @@ import java.util.List;
 @Builder
 public class ItemDtoWithBookingAndComments {
     private long id;
-    private long owner;
+    private Long owner;
     private String name;
     private String description;
     private Boolean available;
+    private Long request;
     private BookingDtoForOwner lastBooking;
     private BookingDtoForOwner nextBooking;
     private List<CommentDto> comments;

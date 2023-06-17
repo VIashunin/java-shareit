@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -12,25 +13,25 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@NoArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<UserDto> getAllUsers() {
-        return userMapper.mapFromUserListToUserDtoList(userRepository.findAll());
+        return UserMapper.mapFromUserListToUserDtoList(userRepository.findAll());
     }
 
     @Override
     public UserDto getUserById(long userId) {
-        return userMapper.mapFromUserToUserDto(findUserById(userId));
+        return UserMapper.mapFromUserToUserDto(findUserById(userId));
     }
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        return userMapper.mapFromUserToUserDto(userRepository.save(userMapper.mapFromUserDtoToUser(userDto)));
+        return UserMapper.mapFromUserToUserDto(userRepository.save(UserMapper.mapFromUserDtoToUser(userDto)));
     }
 
     @Override

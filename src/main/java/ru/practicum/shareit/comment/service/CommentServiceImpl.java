@@ -1,6 +1,7 @@
 package ru.practicum.shareit.comment.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -17,15 +18,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@NoArgsConstructor
 @Transactional
 public class CommentServiceImpl implements CommentService {
-    private final CommentRepository commentRepository;
-    private final BookingRepository bookingRepository;
-    private final CommentMapper commentMapper;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private BookingRepository bookingRepository;
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentShort commentShort) {
+        if (commentShort.getCreated() == null) {
+            commentShort.setCreated(LocalDateTime.now());
+        }
         Booking booking = bookingRepository.getBookingByBookerIdAndItemId(userId, itemId, LocalDateTime.now());
         if ((booking != null) && !booking.getBookingStatus().equals(BookingStatus.REJECTED)) {
             CommentDto commentDto = CommentDto.builder()
@@ -33,11 +38,8 @@ public class CommentServiceImpl implements CommentService {
                     .authorName(booking.getBooker().getName())
                     .created(commentShort.getCreated())
                     .build();
-            if (commentDto.getCreated() == null) {
-                commentDto.setCreated(LocalDateTime.now());
-            }
-            Comment comment = commentMapper.mapFromCommentDtoToComment(commentDto, booking.getBooker(), booking.getItem());
-            return commentMapper.mapFromCommentToCommentDto(commentRepository.save(comment));
+            Comment comment = CommentMapper.mapFromCommentDtoToComment(commentDto, booking.getBooker(), booking.getItem());
+            return CommentMapper.mapFromCommentToCommentDto(commentRepository.save(comment));
         } else {
             throw new ItemWasNotBookedEarlierException();
         }
@@ -45,6 +47,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDto> getCommentsByItemId(long itemId) {
-        return commentMapper.mapFromCommentListToCommentDtoList(commentRepository.getCommentsByItemId(itemId));
+        return CommentMapper.mapFromCommentListToCommentDtoList(commentRepository.getCommentsByItemId(itemId));
     }
 }
