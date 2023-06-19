@@ -2,13 +2,14 @@ package ru.practicum.shareit.booking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingShort;
@@ -47,9 +48,10 @@ class BookingControllerTest {
     static List<BookingDto> bookingDtoList;
     static LocalDateTime start;
     static LocalDateTime end;
+    static String X_SHARER_USER_ID = "X-Sharer-User-Id";
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void beforeEach() {
         start = LocalDateTime.of(2024, 6, 15, 21, 15, 21);
         end = LocalDateTime.of(2024, 6, 15, 21, 16, 21);
         user = User.builder().id(1L).name("User").email("user@yandex.ru").build();
@@ -60,18 +62,9 @@ class BookingControllerTest {
         bookingDtoList = List.of(BookingDto.builder().start(start).end(end).status(BookingStatus.WAITING).booker(user).item(item).build());
     }
 
-    @Test
     @SneakyThrows
-    void addBookingTest() {
-        when(bookingService.addBooking(anyLong(), any()))
-                .thenReturn(bookingDto);
-
-        mvc.perform(post("/bookings")
-                        .content(mapper.writeValueAsString(bookingShort))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L))
+    void andExpectBookingDto(ResultActions resultActions, BookingDto bookingDto) {
+        resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class))
                 .andExpect(jsonPath("$.start", is(bookingDto.getStart().toString())))
@@ -79,6 +72,28 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$.status", is(bookingDto.getStatus().name())))
                 .andExpect(jsonPath("$.booker", notNullValue()))
                 .andExpect(jsonPath("$.item", notNullValue()));
+    }
+
+    @SneakyThrows
+    void andExpectBookingDtoList(ResultActions resultActions, List<BookingDto> bookingDtoList) {
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(bookingDtoList)));
+    }
+
+    @Test
+    @SneakyThrows
+    void addBookingTest() {
+        when(bookingService.addBooking(anyLong(), any()))
+                .thenReturn(bookingDto);
+
+        ResultActions ra = mvc.perform(post("/bookings")
+                .content(mapper.writeValueAsString(bookingShort))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(X_SHARER_USER_ID, 1L));
+        andExpectBookingDto(ra, bookingDto);
     }
 
     @Test
@@ -87,19 +102,13 @@ class BookingControllerTest {
         when(bookingService.confirmBooking(anyLong(), anyLong(), anyBoolean()))
                 .thenReturn(bookingDto);
 
-        mvc.perform(patch("/bookings/1?approved=true")
-                        .content(mapper.writeValueAsString(bookingDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class))
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart().toString())))
-                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().toString())))
-                .andExpect(jsonPath("$.status", is(bookingDto.getStatus().name())))
-                .andExpect(jsonPath("$.booker", notNullValue()))
-                .andExpect(jsonPath("$.item", notNullValue()));
+        ResultActions ra = mvc.perform(patch("/bookings/1?approved=true")
+                .content(mapper.writeValueAsString(bookingDto))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(X_SHARER_USER_ID, 1L));
+        andExpectBookingDto(ra, bookingDto);
     }
 
     @Test
@@ -108,19 +117,13 @@ class BookingControllerTest {
         when(bookingService.getBookingById(anyLong(), anyLong()))
                 .thenReturn(bookingDto);
 
-        mvc.perform(get("/bookings/1")
-                        .content(mapper.writeValueAsString(bookingDto))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(bookingDto.getId()), Long.class))
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart().toString())))
-                .andExpect(jsonPath("$.end", is(bookingDto.getEnd().toString())))
-                .andExpect(jsonPath("$.status", is(bookingDto.getStatus().name())))
-                .andExpect(jsonPath("$.booker", notNullValue()))
-                .andExpect(jsonPath("$.item", notNullValue()));
+        ResultActions ra = mvc.perform(get("/bookings/1")
+                .content(mapper.writeValueAsString(bookingDto))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(X_SHARER_USER_ID, 1L));
+        andExpectBookingDto(ra, bookingDto);
     }
 
     @Test
@@ -129,14 +132,13 @@ class BookingControllerTest {
         when(bookingService.getBookingsListByUserId(anyLong(), any(), any(), any()))
                 .thenReturn(bookingDtoList);
 
-        mvc.perform(get("/bookings")
-                        .content(mapper.writeValueAsString(bookingDtoList))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookingDtoList)));
+        ResultActions ra = mvc.perform(get("/bookings")
+                .content(mapper.writeValueAsString(bookingDtoList))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(X_SHARER_USER_ID, 1L));
+        andExpectBookingDtoList(ra, bookingDtoList);
     }
 
     @Test
@@ -145,13 +147,12 @@ class BookingControllerTest {
         when(bookingService.getBookingsListByOwnerId(anyLong(), any(), any(), any()))
                 .thenReturn(bookingDtoList);
 
-        mvc.perform(get("/bookings/owner")
-                        .content(mapper.writeValueAsString(bookingDtoList))
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .header("X-Sharer-User-Id", 1L))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookingDtoList)));
+        ResultActions ra = mvc.perform(get("/bookings/owner")
+                .content(mapper.writeValueAsString(bookingDtoList))
+                .characterEncoding(StandardCharsets.UTF_8)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(X_SHARER_USER_ID, 1L));
+        andExpectBookingDtoList(ra, bookingDtoList);
     }
 }

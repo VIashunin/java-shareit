@@ -28,10 +28,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentShort commentShort) {
+        LocalDateTime created = LocalDateTime.now();
         if (commentShort.getCreated() == null) {
-            commentShort.setCreated(LocalDateTime.now());
+            commentShort.setCreated(created);
         }
-        Booking booking = bookingRepository.getBookingByBookerIdAndItemId(userId, itemId, LocalDateTime.now());
+        Booking booking = bookingRepository.getBookingByBookerIdAndItemId(userId, itemId, created);
         if ((booking != null) && !booking.getBookingStatus().equals(BookingStatus.REJECTED)) {
             CommentDto commentDto = CommentDto.builder()
                     .text(commentShort.getText())

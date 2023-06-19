@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,10 +34,16 @@ class UserControllerTest {
     @Autowired
     private MockMvc mvc;
 
+    UserDto userDto;
+
+    @BeforeEach
+    void beforeEach() {
+        userDto = UserDto.builder().id(1L).name("User").email("user@yandex.ru").build();
+    }
+
     @Test
     @SneakyThrows
     void getAllUsersTest() {
-        UserDto userDto = UserDto.builder().id(1L).name("User").email("user@yandex.ru").build();
         List<UserDto> userDtoList = List.of(userDto);
 
         when(userService.getAllUsers())
@@ -53,8 +60,6 @@ class UserControllerTest {
     @Test
     @SneakyThrows
     void getUserByIdTest() {
-        UserDto userDto = UserDto.builder().id(1L).name("User").email("user@yandex.ru").build();
-
         when(userService.getUserById(anyLong()))
                 .thenReturn(userDto);
 
@@ -72,8 +77,6 @@ class UserControllerTest {
     @Test
     @SneakyThrows
     void addUserTest() {
-        UserDto userDto = UserDto.builder().id(1L).name("User").email("user@yandex.ru").build();
-
         when(userService.addUser(any()))
                 .thenReturn(userDto);
 
@@ -91,8 +94,6 @@ class UserControllerTest {
     @Test
     @SneakyThrows
     void updateUserTest() {
-        UserDto userDto = UserDto.builder().id(1L).name("User").email("user@yandex.ru").build();
-
         when(userService.updateUser(anyLong(), any()))
                 .thenReturn(userDto);
 

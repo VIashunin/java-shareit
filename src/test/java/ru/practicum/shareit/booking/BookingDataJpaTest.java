@@ -52,40 +52,34 @@ public class BookingDataJpaTest {
         bookingRepository.deleteAll();
     }
 
+    void assertThat(Booking booking1, Booking booking2) {
+        MatcherAssert.assertThat(booking1.getId(), notNullValue());
+        MatcherAssert.assertThat(booking1.getStart(), equalTo(booking2.getStart()));
+        MatcherAssert.assertThat(booking1.getEnd(), equalTo(booking2.getEnd()));
+        MatcherAssert.assertThat(booking1.getItem(), equalTo(booking2.getItem()));
+        MatcherAssert.assertThat(booking1.getBooker(), equalTo(booking2.getBooker()));
+        MatcherAssert.assertThat(booking1.getBookingStatus(), equalTo(booking2.getBookingStatus()));
+    }
+
     @Test
     void getBookingByIdTest() {
         Booking bookingJpa = bookingRepository.getBookingById(booking.getId(), user.getId());
 
-        MatcherAssert.assertThat(bookingJpa.getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpa.getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpa.getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpa.getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpa.getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpa.getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpa, booking);
     }
 
     @Test
     void getAllBookingByUserIdTest() {
         List<Booking> bookingJpaList = bookingRepository.getAllBookingByUserId(user.getId(), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByUserIdAndBookingStatusCurrentTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByUserIdAndBookingStatusCurrent(user.getId(), start.plusSeconds(5), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
@@ -93,36 +87,21 @@ public class BookingDataJpaTest {
 
         List<Booking> bookingJpaList = bookingRepository.getBookingByUserIdAndBookingStatusPast(user.getId(), end.plusSeconds(5), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByUserIdAndBookingStatusFutureTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByUserIdAndBookingStatusFuture(user.getId(), start.minusDays(1), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByUserIdAndBookingStatusWaitingTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByUserIdAndBookingStatusWaiting(user.getId(), BookingStatus.WAITING, Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
@@ -132,72 +111,42 @@ public class BookingDataJpaTest {
 
         List<Booking> bookingJpaList = bookingRepository.getBookingByUserIdAndBookingStatusRejected(user.getId(), BookingStatus.REJECTED, Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(bookingRejected.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(bookingRejected.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(bookingRejected.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(bookingRejected.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(bookingRejected.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), bookingRejected);
     }
 
     @Test
     void getAllBookingByOwnerIdTest() {
         List<Booking> bookingJpaList = bookingRepository.getAllBookingByOwnerId(owner.getId(), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByOwnerIdAndBookingStatusCurrentTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByOwnerIdAndBookingStatusCurrent(owner.getId(), start.plusSeconds(5), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByOwnerIdAndBookingStatusPastTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByOwnerIdAndBookingStatusPast(owner.getId(), start.plusDays(1), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByOwnerIdAndBookingStatusFutureTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByOwnerIdAndBookingStatusFuture(owner.getId(), start.minusDays(1), Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
     void getBookingByOwnerIdAndBookingStatusWaitingTest() {
         List<Booking> bookingJpaList = bookingRepository.getBookingByOwnerIdAndBookingStatusWaiting(owner.getId(), BookingStatus.WAITING, Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), booking);
     }
 
     @Test
@@ -207,12 +156,7 @@ public class BookingDataJpaTest {
 
         List<Booking> bookingJpaList = bookingRepository.getBookingByOwnerIdAndBookingStatusRejected(owner.getId(), BookingStatus.REJECTED, Pageable.ofSize(4));
 
-        MatcherAssert.assertThat(bookingJpaList.get(0).getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpaList.get(0).getStart(), equalTo(bookingRejected.getStart()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getEnd(), equalTo(bookingRejected.getEnd()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getItem(), equalTo(bookingRejected.getItem()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBooker(), equalTo(bookingRejected.getBooker()));
-        MatcherAssert.assertThat(bookingJpaList.get(0).getBookingStatus(), equalTo(bookingRejected.getBookingStatus()));
+        assertThat(bookingJpaList.get(0), bookingRejected);
     }
 
     @Test
@@ -222,12 +166,7 @@ public class BookingDataJpaTest {
 
         Booking bookingJpa = bookingRepository.findByItemIdLast(owner.getId(), item.getId(), start.plusDays(2));
 
-        MatcherAssert.assertThat(bookingJpa.getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpa.getStart(), equalTo(bookingApproved.getStart()));
-        MatcherAssert.assertThat(bookingJpa.getEnd(), equalTo(bookingApproved.getEnd()));
-        MatcherAssert.assertThat(bookingJpa.getItem(), equalTo(bookingApproved.getItem()));
-        MatcherAssert.assertThat(bookingJpa.getBooker(), equalTo(bookingApproved.getBooker()));
-        MatcherAssert.assertThat(bookingJpa.getBookingStatus(), equalTo(bookingApproved.getBookingStatus()));
+        assertThat(bookingJpa, bookingApproved);
     }
 
     @Test
@@ -237,12 +176,7 @@ public class BookingDataJpaTest {
 
         Booking bookingJpa = bookingRepository.findByItemIdNext(owner.getId(), item.getId(), start.minusDays(2));
 
-        MatcherAssert.assertThat(bookingJpa.getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpa.getStart(), equalTo(bookingApproved.getStart()));
-        MatcherAssert.assertThat(bookingJpa.getEnd(), equalTo(bookingApproved.getEnd()));
-        MatcherAssert.assertThat(bookingJpa.getItem(), equalTo(bookingApproved.getItem()));
-        MatcherAssert.assertThat(bookingJpa.getBooker(), equalTo(bookingApproved.getBooker()));
-        MatcherAssert.assertThat(bookingJpa.getBookingStatus(), equalTo(bookingApproved.getBookingStatus()));
+        assertThat(bookingJpa, bookingApproved);
     }
 
     @Test
@@ -252,11 +186,6 @@ public class BookingDataJpaTest {
 
         Booking bookingJpa = bookingRepository.getBookingByBookerIdAndItemId(user.getId(), item.getId(), start.plusDays(2));
 
-        MatcherAssert.assertThat(bookingJpa.getId(), notNullValue());
-        MatcherAssert.assertThat(bookingJpa.getStart(), equalTo(booking.getStart()));
-        MatcherAssert.assertThat(bookingJpa.getEnd(), equalTo(booking.getEnd()));
-        MatcherAssert.assertThat(bookingJpa.getItem(), equalTo(booking.getItem()));
-        MatcherAssert.assertThat(bookingJpa.getBooker(), equalTo(booking.getBooker()));
-        MatcherAssert.assertThat(bookingJpa.getBookingStatus(), equalTo(booking.getBookingStatus()));
+        assertThat(bookingJpa, booking);
     }
 }
