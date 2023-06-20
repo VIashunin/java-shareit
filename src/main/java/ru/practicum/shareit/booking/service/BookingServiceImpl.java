@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingShort;
@@ -19,14 +21,18 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.shareit.request.service.ItemRequestServiceImpl.getPageable;
+
 @Service
-@RequiredArgsConstructor
 @Transactional
+@NoArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
-    private final UserService userService;
-    private final ItemService itemService;
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ItemService itemService;
 
     public BookingDto addBooking(long userId, BookingShort bookingShort) {
         User user = userService.findUserById(userId);
@@ -39,15 +45,19 @@ public class BookingServiceImpl implements BookingService {
                     .item(item)
                     .status(BookingStatus.WAITING)
                     .build();
-            if (!bookingDto.getItem().isAvailable()) {
-                throw new ItemNotAvailableException(bookingDto.getItem().getId());
-            }
-            if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().isEqual(bookingDto.getStart())) {
-                throw new EndBeforeOrEqualStartException();
-            }
-            return bookingMapper.mapFromBookingToBookingDto(bookingRepository.save(bookingMapper.mapFromBookingDtoToBooking(bookingDto, item, user)));
+            validationOfBookingDto(bookingDto);
+            return BookingMapper.mapFromBookingToBookingDto(bookingRepository.save(BookingMapper.mapFromBookingDtoToBooking(bookingDto, item, user)));
         } else {
             throw new BookingOfOwnItemException();
+        }
+    }
+
+    public void validationOfBookingDto(BookingDto bookingDto) {
+        if (!bookingDto.getItem().isAvailable()) {
+            throw new ItemNotAvailableException(bookingDto.getItem().getId());
+        }
+        if (bookingDto.getEnd().isBefore(bookingDto.getStart()) || bookingDto.getEnd().isEqual(bookingDto.getStart())) {
+            throw new EndBeforeOrEqualStartException();
         }
     }
 
@@ -60,7 +70,7 @@ public class BookingServiceImpl implements BookingService {
                 } else {
                     booking.setBookingStatus(BookingStatus.REJECTED);
                 }
-                return bookingMapper.mapFromBookingToBookingDto(bookingRepository.save(booking));
+                return BookingMapper.mapFromBookingToBookingDto(bookingRepository.save(booking));
             } else {
                 throw new BookingAlreadyApprovedException(booking.getId());
             }
@@ -72,29 +82,30 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(long userId, long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
         if ((booking.getItem().getOwner().getId() == userId) || (booking.getBooker().getId() == userId)) {
-            return bookingMapper.mapFromBookingToBookingDto(bookingRepository.getBookingById(bookingId, userId));
+            return BookingMapper.mapFromBookingToBookingDto(bookingRepository.getBookingById(bookingId, userId));
         } else {
             throw new NotOwnerOrNotBookerException("You are not the owner or the booker of requested item for showing this booking.");
         }
     }
 
-    public List<BookingDto> getBookingsListByUserId(long userId, String state) {
+    public List<BookingDto> getBookingsListByUserId(long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
+        Pageable page = paginate(from, size);
         try {
             BookingState bookingState = BookingState.valueOf(state);
             switch (bookingState) {
                 case ALL:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getAllBookingByUserId(userId));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getAllBookingByUserId(userId, page));
                 case CURRENT:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusCurrent(userId, LocalDateTime.now()));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusCurrent(userId, LocalDateTime.now(), page));
                 case PAST:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusPast(userId, LocalDateTime.now()));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusPast(userId, LocalDateTime.now(), page));
                 case FUTURE:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusFuture(userId, LocalDateTime.now()));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusFuture(userId, LocalDateTime.now(), page));
                 case WAITING:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusWaiting(userId, BookingStatus.WAITING));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusWaiting(userId, BookingStatus.WAITING, page));
                 case REJECTED:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusRejected(userId, BookingStatus.REJECTED));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByUserIdAndBookingStatusRejected(userId, BookingStatus.REJECTED, page));
                 default:
                     return List.of();
             }
@@ -103,28 +114,33 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    public List<BookingDto> getBookingsListByOwnerId(long userId, String state) {
+    public List<BookingDto> getBookingsListByOwnerId(long userId, String state, Integer from, Integer size) {
         userService.findUserById(userId);
+        Pageable page = paginate(from, size);
         try {
             BookingState bookingState = BookingState.valueOf(state);
             switch (bookingState) {
                 case ALL:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getAllBookingByOwnerId(userId));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getAllBookingByOwnerId(userId, page));
                 case CURRENT:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusCurrent(userId, LocalDateTime.now()));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusCurrent(userId, LocalDateTime.now(), page));
                 case PAST:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusPast(userId, LocalDateTime.now()));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusPast(userId, LocalDateTime.now(), page));
                 case FUTURE:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusFuture(userId, LocalDateTime.now()));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusFuture(userId, LocalDateTime.now(), page));
                 case WAITING:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusWaiting(userId, BookingStatus.WAITING));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusWaiting(userId, BookingStatus.WAITING, page));
                 case REJECTED:
-                    return bookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusRejected(userId, BookingStatus.REJECTED));
+                    return BookingMapper.mapFromBookingListToBookingDtoList(bookingRepository.getBookingByOwnerIdAndBookingStatusRejected(userId, BookingStatus.REJECTED, page));
                 default:
                     return List.of();
             }
         } catch (IllegalArgumentException e) {
             throw new UnknownBookingStateException("Unknown state: " + state);
         }
+    }
+
+    public Pageable paginate(Integer from, Integer size) {
+        return getPageable(from, size);
     }
 }

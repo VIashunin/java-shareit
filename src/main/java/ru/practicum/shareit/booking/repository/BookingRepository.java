@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -23,7 +24,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where b.booker.id = ?1 " +
             "order by b.start desc")
-    List<Booking> getAllBookingByUserId(long userId);
+    List<Booking> getAllBookingByUserId(long userId, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -31,7 +32,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where b.booker.id = ?1 and ?2 between b.start and b.end " +
             "order by b.end desc")
-    List<Booking> getBookingByUserIdAndBookingStatusCurrent(long userId, LocalDateTime time);
+    List<Booking> getBookingByUserIdAndBookingStatusCurrent(long userId, LocalDateTime time, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -39,7 +40,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where b.booker.id = ?1 and b.end < ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByUserIdAndBookingStatusPast(long userId, LocalDateTime time);
+    List<Booking> getBookingByUserIdAndBookingStatusPast(long userId, LocalDateTime time, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -47,7 +48,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where b.booker.id = ?1 and b.start > ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByUserIdAndBookingStatusFuture(long userId, LocalDateTime time);
+    List<Booking> getBookingByUserIdAndBookingStatusFuture(long userId, LocalDateTime time, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -55,7 +56,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where b.booker.id = ?1 and b.bookingStatus like ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByUserIdAndBookingStatusWaiting(long userId, BookingStatus bookingStatus);
+    List<Booking> getBookingByUserIdAndBookingStatusWaiting(long userId, BookingStatus bookingStatus, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -63,7 +64,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where b.booker.id = ?1 and b.bookingStatus like ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByUserIdAndBookingStatusRejected(long userId, BookingStatus bookingStatus);
+    List<Booking> getBookingByUserIdAndBookingStatusRejected(long userId, BookingStatus bookingStatus, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -71,7 +72,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where i.owner.id = ?1 " +
             "order by b.start desc")
-    List<Booking> getAllBookingByOwnerId(long userId);
+    List<Booking> getAllBookingByOwnerId(long userId, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -79,7 +80,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where i.owner.id = ?1 and ?2 between b.start and b.end " +
             "order by b.end desc")
-    List<Booking> getBookingByOwnerIdAndBookingStatusCurrent(long userId, LocalDateTime time);
+    List<Booking> getBookingByOwnerIdAndBookingStatusCurrent(long userId, LocalDateTime time, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -87,7 +88,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where i.owner.id = ?1 and b.end < ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByOwnerIdAndBookingStatusPast(long userId, LocalDateTime time);
+    List<Booking> getBookingByOwnerIdAndBookingStatusPast(long userId, LocalDateTime time, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -95,7 +96,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where i.owner.id = ?1 and b.start > ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByOwnerIdAndBookingStatusFuture(long userId, LocalDateTime time);
+    List<Booking> getBookingByOwnerIdAndBookingStatusFuture(long userId, LocalDateTime time, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -103,7 +104,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where i.owner.id = ?1 and b.bookingStatus like ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByOwnerIdAndBookingStatusWaiting(long userId, BookingStatus bookingStatus);
+    List<Booking> getBookingByOwnerIdAndBookingStatusWaiting(long userId, BookingStatus bookingStatus, Pageable page);
 
     @Query(value = "select b " +
             "from Booking as b " +
@@ -111,7 +112,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "join fetch b.booker as u " +
             "where i.owner.id = ?1 and b.bookingStatus like ?2 " +
             "order by b.end desc")
-    List<Booking> getBookingByOwnerIdAndBookingStatusRejected(long userId, BookingStatus bookingStatus);
+    List<Booking> getBookingByOwnerIdAndBookingStatusRejected(long userId, BookingStatus bookingStatus, Pageable page);
 
     @Query(value = "select b.* from bookings as b " +
             "left join items as i on b.item_id = i.id " +
