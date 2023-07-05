@@ -16,8 +16,8 @@ import javax.validation.constraints.PositiveOrZero;
 @RequiredArgsConstructor
 @Validated
 public class ItemRequestController {
-    private final ItemRequestClient itemRequestClient;
     private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private final ItemRequestClient itemRequestClient;
 
     @PostMapping
     public ResponseEntity<Object> addRequest(@NotNull @RequestHeader(X_SHARER_USER_ID) long userId,
@@ -33,8 +33,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<Object> getRequests(@NotNull @RequestHeader(X_SHARER_USER_ID) long userId,
-                                              @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                              @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                              @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                              @Positive @RequestParam(defaultValue = "10") Integer size) {
         return itemRequestClient.getRequests(userId, from, size);
     }
 

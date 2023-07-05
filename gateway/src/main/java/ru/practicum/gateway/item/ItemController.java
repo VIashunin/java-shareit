@@ -17,8 +17,8 @@ import javax.validation.constraints.PositiveOrZero;
 @RequiredArgsConstructor
 @Validated
 public class ItemController {
-    private final ItemClient itemClient;
     private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private final ItemClient itemClient;
 
     @PostMapping
     public ResponseEntity<Object> addItem(@RequestHeader(X_SHARER_USER_ID) long userId,
@@ -42,8 +42,8 @@ public class ItemController {
 
     @GetMapping("/search")
     public ResponseEntity<Object> searchItem(@RequestParam String text,
-                                             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                             @Positive @RequestParam(defaultValue = "10") Integer size) {
         return itemClient.searchItem(text, from, size);
     }
 
@@ -55,8 +55,8 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Object> getItems(@NotNull @RequestHeader(X_SHARER_USER_ID) long userId,
-                                           @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                           @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                           @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                           @Positive @RequestParam(defaultValue = "10") Integer size) {
         return itemClient.getItems(userId, from, size);
     }
 }

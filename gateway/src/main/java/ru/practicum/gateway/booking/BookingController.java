@@ -18,8 +18,8 @@ import javax.validation.constraints.PositiveOrZero;
 @RequiredArgsConstructor
 @Validated
 public class BookingController {
-    private final BookingClient bookingClient;
     private static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+    private final BookingClient bookingClient;
 
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader(X_SHARER_USER_ID) long userId,
@@ -43,8 +43,8 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<Object> getBookings(@RequestHeader(X_SHARER_USER_ID) long userId,
                                               @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-                                              @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                              @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                              @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                              @Positive @RequestParam(defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new UnknownBookingStateException("Unknown state: " + stateParam));
         return bookingClient.getBookings(userId, state, from, size);
@@ -53,8 +53,8 @@ public class BookingController {
     @GetMapping("/owner")
     public ResponseEntity<Object> getBookingsForOwner(@NotNull @RequestHeader(X_SHARER_USER_ID) long userId,
                                                       @RequestParam(name = "state", defaultValue = "ALL") String stateParam,
-                                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                      @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                      @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                      @Positive @RequestParam(defaultValue = "10") Integer size) {
         BookingState state = BookingState.from(stateParam)
                 .orElseThrow(() -> new UnknownBookingStateException("Unknown state: " + stateParam));
         return bookingClient.getBookingsForOwner(userId, state, from, size);
